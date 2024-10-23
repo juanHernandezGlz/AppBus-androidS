@@ -1,9 +1,13 @@
 package cl.juanhernandez.myappbus;
 
+import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.Bundle;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
+import com.google.firebase.auth.FirebaseAuth;
 
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -32,6 +36,28 @@ public class MainActivity extends AppCompatActivity {
         NavController navController = Navigation.findNavController(this, R.id.nav_host_fragment_activity_main);
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
+
+    }
+
+    public void onBackPressed(){
+        super.onBackPressed();
+        new AlertDialog.Builder(this)
+                .setTitle("Cerrar sesión")
+                .setMessage("¿Estás seguro de que quieres cerrar sesión?")
+                .setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface dialog, int which) {
+                        // Aquí puedes cerrar sesión de Firebase
+                        FirebaseAuth.getInstance().signOut();
+
+                        // Redirigir al usuario a la pantalla de Login
+                        Intent intent = new Intent(MainActivity.this, Login.class);
+                        startActivity(intent);
+                        finish(); // Cerrar la MainActivity
+                    }
+                })
+                .setNegativeButton("No", null) // Si selecciona 'No', el cuadro de diálogo se cierra
+                .show();
     }
 
 }
