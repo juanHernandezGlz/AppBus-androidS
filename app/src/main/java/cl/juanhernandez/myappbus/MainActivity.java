@@ -7,14 +7,19 @@ import android.os.Bundle;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 
+import androidx.activity.OnBackPressedCallback;
 import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.fragment.app.Fragment;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
 import androidx.navigation.ui.AppBarConfiguration;
 import androidx.navigation.ui.NavigationUI;
 
 import cl.juanhernandez.myappbus.databinding.ActivityMainBinding;
+import cl.juanhernandez.myappbus.ui.dashboard.DashboardFragment;
+import cl.juanhernandez.myappbus.ui.home.HomeFragment;
+import cl.juanhernandez.myappbus.ui.notifications.NotificationsFragment;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -37,27 +42,48 @@ public class MainActivity extends AppCompatActivity {
         NavigationUI.setupActionBarWithNavController(this, navController, appBarConfiguration);
         NavigationUI.setupWithNavController(binding.navView, navController);
 
+        // Configurar el callback de retroceso personalizado
+        getOnBackPressedDispatcher().addCallback(this, new OnBackPressedCallback(true) {
+            @Override
+            public void handleOnBackPressed() {
+                Fragment currentFragment = getSupportFragmentManager().findFragmentById(R.id.nav_host_fragment_activity_main);
+
+                if (currentFragment instanceof HomeFragment) {
+
+                } else if (currentFragment instanceof DashboardFragment) {
+                    // Navega al HomeFragment
+                    navController.navigate(R.id.navigation_home);
+                } else if (currentFragment instanceof NotificationsFragment) {
+                    // Navega al DashboardFragment
+                    navController.navigate(R.id.navigation_dashboard);
+                } else {
+                    // Si no está en ningún fragmento específico, desactiva el callback
+                    setEnabled(false);
+                    onBackPressed();
+                }
+            }
+        });
     }
 
-    public void onBackPressed(){
-        super.onBackPressed();
-        new AlertDialog.Builder(this)
-                .setTitle("Cerrar sesión")
-                .setMessage("¿Estás seguro de que quieres cerrar sesión?")
-                .setPositiveButton("Sí", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        // Aquí puedes cerrar sesión de Firebase
-                        FirebaseAuth.getInstance().signOut();
-
-                        // Redirigir al usuario a la pantalla de Login
-                        Intent intent = new Intent(MainActivity.this, Login.class);
-                        startActivity(intent);
-                        finish(); // Cerrar la MainActivity
-                    }
-                })
-                .setNegativeButton("No", null) // Si selecciona 'No', el cuadro de diálogo se cierra
-                .show();
-    }
 
 }
+
+
+
+/*
+* // Muestra el cuadro de diálogo para confirmar cerrar sesión
+                    new AlertDialog.Builder(MainActivity.this)
+                            .setTitle("Cerrar sesión")
+                            .setMessage("¿Estás seguro de que quieres cerrar sesión?")
+                            .setPositiveButton("Sí", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    FirebaseAuth.getInstance().signOut();
+                                    Intent intent = new Intent(MainActivity.this, Login.class);
+                                    startActivity(intent);
+                                    finish();
+                                }
+                            })
+                            .setNegativeButton("No", null)
+                            .show();
+* */
